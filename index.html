@@ -158,7 +158,7 @@ table{font-size:13px}.stack thead{display:none}.stack tr{display:grid;padding-bl
 </ol>
 </div>
 <div class="row2">
-<div><label for="txn">MoMo transaction ID</label><input id="txn" placeholder="e.g. 51234567890"></div>
+<div><label for="txn">MoMo transaction ID</label><input id="txn" inputmode="numeric" autocomplete="off" placeholder="e.g. 51234567890"></div>
 <div><label for="from">Paid from number</label><input id="from" inputmode="tel" placeholder="Same as your phone"></div>
 </div>
 </section>
@@ -339,7 +339,7 @@ if (!t.food) e.push("Add at least one pack.");
 if (!v("name")) e.push("Enter your name.");
 if (v("phone").replace(/\D/g,"").length < 9) e.push("Enter a phone number we can reach you on.");
 if (!v("loc")) e.push(mode==="delivery" ? "Say where we should deliver." : "Say where you'll pick it up.");
-if (v("txn").length < 6) e.push("Pay with MoMo, then enter the transaction ID.");
+if (!/^\d{8,}$/.test(v("txn").replace(/\s/g,""))) e.push("Pay with MoMo first, then enter the transaction ID from your MoMo message (numbers only). You can't send your order without it.");
 return e;
 }
 
@@ -392,7 +392,9 @@ catch(e){ btn.textContent = "Copy didn't work, select and copy by hand"; }
 setTimeout(()=>btn.textContent = old, 1800);
 }
 document.querySelectorAll("[data-copy]").forEach(b=>b.addEventListener("click", ()=>copyText($(b.dataset.copy).textContent.replace(/\s/g,""), b)));
-$("copyOrder").addEventListener("click", ev=>copyText(message(totals()), ev.currentTarget));
+$("copyOrder").addEventListener("click", ev=>{ const btn = ev.currentTarget; sentOnce = true; update();
+if (problems(totals()).length){ $("errs").scrollIntoView({block:"nearest"}); return; }
+copyText(message(totals()), btn); });
 $("newOrder").addEventListener("click", ()=>{ fresh(); $("txn").value=""; $("from").value=""; $("note").value=""; $("done").hidden = true; sentOnce=false; $("errs").innerHTML=""; drawPacks(); update(); scrollTo(0,0); });
 
 /* start */
